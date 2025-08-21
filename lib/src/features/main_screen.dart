@@ -8,32 +8,71 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final TextEditingController _editingController = TextEditingController();
+  Future<String>? _future;
+
+  Future<String>? zipCode(String zip) async {
+    return await getCityFromZip(zip);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: Column(
-            spacing: 32,
-            children: [
-              TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: "Postleitzahl",
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: Column(
+              spacing: 32,
+              children: [
+                TextFormField(
+                  controller: _editingController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: "Postleitzahl",
+                  ),
                 ),
-              ),
-              OutlinedButton(
-                onPressed: () {
-                  // TODO: implementiere Suche
-                },
-                child: const Text("Suche"),
-              ),
-              Text(
-                "Ergebnis: Noch keine PLZ gesucht",
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-            ],
+                OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      _future = zipCode(_editingController.text);
+                    });
+                    // TODO: implementiere Suche
+                  },
+                  child: const Text("Suche"),
+                ),
+                Column(
+                  children: [
+                    FutureBuilder<String>(
+                      future: _future,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        }
+                        if (snapshot.hasError) {
+                          return Row(
+                            children: [
+                              Icon(Icons.error),
+                              Text('Fehler aufgetreten: ${snapshot.error}'),
+                            ],
+                          );
+                        }
+                        if (snapshot.hasData) {
+                          return Text('Ergebnis: ${snapshot.data} ');
+                        }
+
+                        return const Text('Noch kein Ergebnis gesucht.');
+                      },
+                    ),
+                  ],
+                ),
+                // Text(
+                //   "Ergebnis: Noch keine PLZ gesucht",
+                //   style: Theme.of(context).textTheme.labelLarge,
+                // ),
+              ],
+            ),
           ),
         ),
       ),
@@ -43,6 +82,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void dispose() {
     // TODO: dispose controllers
+    _editingController.dispose();
     super.dispose();
   }
 
@@ -55,6 +95,8 @@ class _MainScreenState extends State<MainScreen> {
         return 'Berlin';
       case "20095":
         return 'Hamburg';
+      case "04177":
+        return 'Leipzig';
       case "80331":
         return 'München';
       case "50667":
