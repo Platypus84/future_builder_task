@@ -37,7 +37,6 @@ class _MainScreenState extends State<MainScreen> {
                     setState(() {
                       _future = zipCode(_editingController.text);
                     });
-                    // TODO: implementiere Suche
                   },
                   child: const Text("Suche"),
                 ),
@@ -81,7 +80,6 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void dispose() {
-    // TODO: dispose controllers
     _editingController.dispose();
     super.dispose();
   }
